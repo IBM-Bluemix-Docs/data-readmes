@@ -1,10 +1,24 @@
 # IBM Watson Knowledge Studio
 
-## Introduction
+IBM Watson Knowledge Studio is an application that enables developers and domain experts to collaborate on the creation of custom annotator components that can be used to identify mentions and relations in unstructured text.
+
+# Introduction
+
+## Summary
 
 Use IBM Watson™ Knowledge Studio (WKS) to create a machine learning model that understands the linguistic nuances, meaning, and relationships specific to your industry or to create a rule-based model that finds entities in documents based on rules that you define.
 
 To become a subject matter expert in a given industry or domain, Watson must be trained. You can facilitate the task of training Watson with Knowledge Studio.
+
+## Features
+
+- Intuitive: Use a guided experience to teach Watson nuances of natural language without writing a single line of code
+- Collaborative: SMEs work together to infuse domain knowledge in cognitive applications
+- Cost effective: Create and deploy domain knowledge infused annotators faster than ever before using an integrated development environment
+
+# CASE Details
+
+This CASE provides a helm chart of IBM Watson Knowledge Studio.
 
 ## Chart Details
 
@@ -37,7 +51,7 @@ This chart installs the following stores:
 - Helm 2.9.0 or later
 - [`PodDisruptionBudgets`](https://kubernetes.io/docs/tasks/run-application/configure-pdb/) are recommended for high resiliency in an application during risky operations, such as draining a node for maintenance or scaling down a cluster.
 
-## PodSecurityPolicy Requirements
+### PodSecurityPolicy Requirements
 
 ### ICP PodSecurityPolicy Requirements
 
@@ -46,46 +60,46 @@ This chart requires a `PodSecurityPolicy` to be bound to the target namespace pr
 - ICPv3.1 - Predefined  PodSecurityPolicy name: [`ibm-restricted-psp`](https://ibm.biz/cpkspec-psp)
 - Custom PodSecurityPolicy definition:
 
-```yaml
-apiVersion: extensions/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  annotations:
-    kubernetes.io/description: "This policy is the most restrictive,
-      requiring pods to run with a non-root UID, and preventing pods from accessing the host."
-    #apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
-    #apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default
-    seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default
-  name: ibm-watson-ks-psp
-spec:
-  allowPrivilegeEscalation: false
-  forbiddenSysctls:
-  - '*'
-  fsGroup:
-    ranges:
-    - max: 65535
-      min: 1
-    rule: MustRunAs
-  requiredDropCapabilities:
-  - ALL
-  runAsUser:
-    rule: MustRunAsNonRoot
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    ranges:
-    - max: 65535
-      min: 1
-    rule: MustRunAs
-  volumes:
-  - configMap
-  - emptyDir
-  - projected
-  - secret
-  - downwardAPI
-  - persistentVolumeClaim
-```
+  ```yaml
+  apiVersion: extensions/v1beta1
+  kind: PodSecurityPolicy
+  metadata:
+    annotations:
+      kubernetes.io/description: "This policy is the most restrictive,
+        requiring pods to run with a non-root UID, and preventing pods from accessing the host."
+      #apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+      #apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+      seccomp.security.alpha.kubernetes.io/allowedProfileNames: docker/default
+      seccomp.security.alpha.kubernetes.io/defaultProfileName: docker/default
+    name: ibm-watson-ks-psp
+  spec:
+    allowPrivilegeEscalation: false
+    forbiddenSysctls:
+    - '*'
+    fsGroup:
+      ranges:
+      - max: 65535
+        min: 1
+      rule: MustRunAs
+    requiredDropCapabilities:
+    - ALL
+    runAsUser:
+      rule: MustRunAsNonRoot
+    seLinux:
+      rule: RunAsAny
+    supplementalGroups:
+      ranges:
+      - max: 65535
+        min: 1
+      rule: MustRunAs
+    volumes:
+    - configMap
+    - emptyDir
+    - projected
+    - secret
+    - downwardAPI
+    - persistentVolumeClaim
+  ```
 
 ### Red Hat OpenShift SecurityContextConstraints Requirements
 
@@ -93,7 +107,54 @@ This chart requires a `SecurityContextConstraints` (SCC) to be bound to the targ
 
 The default `SecurityContextConstraints` name: [`restricted`](https://ibm.biz/cpkspec-scc) has been verified for this chart, if your target namespace is bound to this `SecurityContextConstraints` resource you can proceed to install the chart.
 
-## Resources Required
+- Custom SecurityContextConstraints definition:
+
+  ```yaml
+  apiVersion: security.openshift.io/v1
+  kind: SecurityContextConstraints
+  metadata:
+    annotations:
+      kubernetes.io/description: "restricted denies access to all host features and requires
+        pods to be run with a UID, and SELinux context that are allocated to the namespace.  This
+        is the most restrictive SCC and it is used by default for authenticated users."
+    name: ibm-watson-ks-scc
+  allowHostDirVolumePlugin: false
+  allowHostIPC: false
+  allowHostNetwork: false
+  allowHostPID: false
+  allowHostPorts: false
+  allowPrivilegeEscalation: true
+  allowPrivilegedContainer: false
+  allowedCapabilities: null
+  defaultAddCapabilities: null
+  fsGroup:
+    type: MustRunAs
+  groups:
+  - system:authenticated
+  priority: null
+  readOnlyRootFilesystem: false
+  requiredDropCapabilities:
+  - KILL
+  - MKNOD
+  - SETUID
+  - SETGID
+  runAsUser:
+    type: MustRunAsRange
+  seLinuxContext:
+    type: MustRunAs
+  supplementalGroups:
+    type: RunAsAny
+  users: []
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+  ```
+
+### Resources Required
 
 In addition to the [general hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/en/SSQNUZ_2.1.0/com.ibm.icpdata.doc/zen/install/reqs-ent.html), this chart has the following requirements:
 
@@ -201,6 +262,10 @@ https://portworx.com/
 A `StorageClass` for Portworx needs to be created. A dynamic provisioner is automatically enabled. See [online document](https://docs.portworx.com/portworx-install-with-kubernetes/storage-operations/kubernetes-storage-101/volumes/#storageclass) for more details.
 
 Note: `ReadWriteMany` mode is required for ARE to share a mounted volume between multiple replicas. See [online document](https://docs.portworx.com/portworx-install-with-kubernetes/storage-operations/kubernetes-storage-101/volumes/#readwritemany-and-readwriteonce) to enable `ReadWriteMany` mode.
+
+# Installing IBM Watson Knowledge Studio
+
+This CASE provides a helm chart of IBM Watson Knowledge Studio.
 
 ## Installing the Chart into CP4D (v2.1.0.2 or earlier) on IBM Cloud Private
 
@@ -420,7 +485,7 @@ You can create service account for Watson Knowledge Studio in your cluster by th
 ```bash
 # Render rbac resource file
 mkdir helm-templates
-helm template ./ibm-watson-knowledge-studio-ppa/wks/charts/ibm-watson-ks-prod-1.1.0.tgz  -n {release_name} --output-dir helm-templates/
+helm template ./ibm-watson-knowledge-studio-ppa/wks/charts/ibm-watson-ks-prod-1.1.1.tgz  -n {release_name} --output-dir helm-templates/
 oc create -f helm-templates/ibm-watson-ks-prod/templates/role.yaml -f helm-templates/ibm-watson-ks-prod/templates/service-account.yaml -f helm-templates/ibm-watson-ks-prod/templates/role-binding.yaml
 ```
 
@@ -597,6 +662,23 @@ These value can be changed on installation by specifying `-O` option of `deploy.
 | --------------- | ----------------------------------------------------------------------------------------------------- | --------------- |
 | `global.clusterDomain` | Cluster domain used by Kubernetes Cluster (the suffix for internal KubeDNS names).                    | `cluster.local` |
 
+### Affinity parameters
+
+Following table lists the affinity parameters for the components in the WKS chart. See [Affinity and anti-affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity) for the details of arguments.
+
+|     Parameter     |                                    Description                                     |     Default     |
+| ----------------- | ---------------------------------------------------------------------------------- | --------------- |
+| `affinity` | Node/pod affinities for WKS Frontend/Broker/Dispatcher pods. If specified overrides default affinity to run on any amd64 node. | `{}` |
+| `mongodb.affinityMongodb` | Node/pod affinities for Mongodb statefulset only. If specified overrides default affinity to run on any amd64 node. | `{}` |
+| `minio.affinityMinio` | Node/pod affinities for Minio statefulset only. If specified overrides default affinity to run on any amd64 node. | `{}` |
+| `postgresql.sentinel.affinity` | Affinity settings for sentinel pod assignment. | `{}` |
+| `postgresql.proxy.affinity` | Affinity settings for proxy pod assignment. | `{}` |
+| `postgresql.keeper.affinity` | Affinity settings for keeper pod assignment. | `{}` |
+| `etcd.affinityEtcd` | Affinities for Etcd stateful set. Overrides the generated affinities if provided. | `{}` |
+| `glimpse.affinity`  | Node/pod affinities for Glimpse pods. If specified overrides default affinity to run on any amd64 node. | `{}`    |
+| `sire.affinity`  | Node/pod affinities for SIRE pods. If specified overrides default affinity to run on any amd64 node. | `{}`    |
+| `wcn.affinity`  | Node/pod affinities for Watson Gateway pods. If specified overrides default affinity to run on any amd64 node. | `{}`    |
+
 ### WKS Front-end parameters
 
 |       Parameter        |                                                           Description                                                            | Default |
@@ -723,6 +805,10 @@ These value can be changed on installation by specifying `-O` option of `deploy.
 | `awt.persistentVolume.storageClassName`       | Storage class name of backing PVC                                                                                                                                                                      | `""`      |
 | `awt.persistentVolume.useDynamicProvisioning` | Enables dynamic binding of Persistent Volume Claims to Persistent Volumes                                                                                                                              | `false`   |
 | `awt.persistentVolume.size`                   | Size of data volume                                                                                                                                                                                    | `20Gi`    |
+
+## Storage
+
+Please refer to the section "Resources Required".
 
 ## Limitations
 

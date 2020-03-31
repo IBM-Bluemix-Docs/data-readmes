@@ -15,11 +15,11 @@ Pods:
 * `ibm-watson-nlu-server` - The API server.  All calls go through here.
 * `ibm-watson-nlu-orchestrator` - Orchestrates processing among the various processing pods.
 * `ibm-watson-nlu-keywords` - Implements the keywords feature.
-* `ibm-watson-nlu-tp-api` - Tokenizes the incoming text.  Only English text is supported.
-* `ibm-watson-nlu-models-server` - Used to import and export models.
+* `ibm-watson-nlp-prod` - Tokenizes the incoming text.  Only English text is supported.
+* `ibm-watson-nms` - Used to import and export models.
 * `ibm-watson-mma` - Frontend to PostgresSql database for storing model information.
-* `ibm-watson-nlu-common-service` - Enables Watson Natural Language Processing features, like Sentiment, Entities, and Categories
-* `ibm-watson-nlu-sire-runtime` - Relationship extraction engine for entities and relations
+* `ibm-watson-cs` - Enables Watson Natural Language Processing features, like Sentiment, Entities, and Categories
+* `ibm-watson-sire-runtime` - Relationship extraction engine for entities and relations
 * `ibm-etcd` - Database
 * `postgres-<keeper,proxy,sentinel>` - Database
 * `minio` - Database
@@ -38,15 +38,17 @@ Secrets:
 
 ## Pre-install steps
 
-This script has to be run once per cluster by a cluster admin. Run: ./ibm_cloud_pak/pak_extensions/pre-install/ clusterAdministration/labelNamespace.sh ICP4D_NAMESPACE where ICP4D_NAMESPACE is the namespace where ICP4D is installed (usually zen).
+A cluster admin must run the following script one time for each cluster.
+```sh
+./ibm_cloud_pak/pak_extensions/pre-install/ clusterAdministration/labelNamespace.sh ICP4D_NAMESPACE
 
 The ICP4D_NAMESPACE namespace must have a label for the NetworkPolicy to correctly work. Only nginx and zen pods will be allowed to communicate with the pods in the namespace where this chart is installed.
 
 ## Prerequisites
 
-* IBM® Cloud Private for Data 2.5
+* IBM® Cloud Private for Data 2.1
 
-  Before installing Watson NLU, __you must install and configure [ICP4D](https://www.ibm.com/support/knowledgecenter/SSQNUZ_current/cpd/install/install.html)__.
+  Before installing Watson NLU, __you must install and configure [ICP4D](https://www.ibm.com/support/knowledgecenter/SSQNUZ_current/com.ibm.icpdata.doc/zen/overview/relnotes-2.1.0.0.html)__.
 * Persistent volumes are set up, prior to installation; see [Storage](#storage) section.
 
 ## PodSecurityPolicy Requirements
@@ -125,14 +127,10 @@ This chart also defines a custom SecurityContextConstraints which can be used to
 
 ## Resources Required
 
-In addition to the [general hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.1.2/supported_system_config/hardware_reqs.html), IBM Watson NLU has the following requirements:
+In addition to the [general hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_3.1.2/supported_system_config/hardware_reqs.html), the IBM Watson NLU has the following requirements:
 
-| Configuration | Minimum CPU | Minimum RAM (GB) | Nodes |
-| :------------ | :---------- | :--------------- | :---- |
-| Development   | 17          | 75               | 3     |
-| 22 VPC - Entities & Relations | 22  | 92       | 3     |
-| 22 VPC - No Entities & Relations | 22   | 141  | 6     |
-| Production    | 26          | 152              | 6     |
+* Minimum CPU - 12 for dev, 22 for HA
+* Minimum RAM - 15GB for dev, 40GB for HA
 
 
 ## Installing the Chart
@@ -140,7 +138,7 @@ In addition to the [general hardware requirements and recommendations](https://w
 To install the chart with the release name `my-release`:
 
 ```bash
-$ helm install --tls --name <my-release> <path-to-chart>
+$ helm install --tls --name my-release stable/ibm-watson-nlu-prod;
 ```
 
 The command deploys ibm-watson-nlu-prod on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -151,7 +149,7 @@ The command deploys ibm-watson-nlu-prod on the Kubernetes cluster in the default
 ### Verifying the Chart
 
 ```bash
-$ helm test my-release --tls
+$ helm test my-release --tls --cleanup
 ```
 
 See the instruction (from NOTES.txt within chart) after the helm installation completes for chart verification. The instruction can also be viewed by running the command: helm status my-release --tls.
@@ -174,19 +172,17 @@ If you omit the `--purge` option, Helm deletes all resources for the deployment,
 
 ## Configuration
 
-Find out more about configuring IBM Watson NLU by reading the [product install documentation](https://www.ibm.com/support/producthub/icpdata/docs/content/SSQNUZ_current/cpd/svc/watson/natural-language-understanding-overview.html).
+Find out more about configuring IBM Watson NLU by reading the [product install documentation](https://docs-icpdata.mybluemix.net/docs/content/SSQNUZ_current/com.ibm.icpdata.doc/watson/natural-language-understanding-install.html)
 
 ## Storage
 
-Parenthetical numbers are the PVs required/created when deploying with the recommended production HA configuration.
+Parenthetical numbers are the PVs required/created when deploying with the recommended HA configuration. See [HA-configuration](#ha-configuration) for more information.
 
-| Component      | Number of replicas | Space per PVC  | Storage type            |
-|----------------|--------------------|----------------|-------------------------|
-| Postgres       |                  3 |           1 GB | Block Storage |
-| Etcd           |               1(5) |           1 GB | Block Storage |
-| Minio          |               1(4) |         100 GB | Block Storage |
-
-Note: When using Portworx, we recommend the PVCs to have 3 replicas. In that case, the total storage would be 3 times what is listed above. For example, with the HA production settings you would need 1.2 TB (4 x 3 x 100 Gb) of storage for Minio.
+| Component      | Number of replicas | Space per PVC | Storage type            |
+|----------------|--------------------|---------------|-------------------------|
+| Postgres       |                  1 |          1 GB | Block Storage |
+| Etcd           |               1(3) |          1 GB | Block Storage |
+| Minio          |               1(4) |         10 GB | Block Storage |
 
 ## Limitations
 
@@ -201,4 +197,4 @@ Note: When using Portworx, we recommend the PVCs to have 3 replicas. In that cas
 
 ## Documentation
 
-Find out more about IBM Watson NLU by reading the [product documentation](https://docs-icpdata.mybluemix.net/docs/content/SSQNUZ_current/com.ibm.icpdata.doc/watson/natural-language-understanding.html).
+Find out more about IBM Watson NLU by reading the [product documentation](https://docs-icpdata.mybluemix.net/docs/content/SSQNUZ_current/com.ibm.icpdata.doc/watson/natural-language-understanding.html)

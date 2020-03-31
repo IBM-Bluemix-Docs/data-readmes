@@ -94,9 +94,6 @@ For each of the following languages, the package contains a translation model fo
 | Korean         | `ko`          |
 | Malay          | `ms`          |
 | Thai           | `th`          |
-| Urdu           | `ur`          |
-| Vietnamese     | `vi`          |
-
 
 ### IBM Watson Language Translator Language Pak 3 (CC47VML)
 
@@ -114,7 +111,6 @@ For each of the following languages, the package contains a translation model fo
 | Greek          | `el`          |
 | Hungarian      | `hu`          |
 | Irish          | `ga`          |
-| Latvian        | `lv`          |
 | Lithuanian     | `lt`          |
 | Norwegian Bokmål | `nb`        |
 | Polish         | `pl`          |
@@ -264,7 +260,7 @@ metadata:
   annotations:
     kubernetes.io/description: "This policy is the most restrictive,
       requiring pods to run with a non-root UID, and preventing pods from accessing the host."
-    cloudpak.ibm.com/version: "1.1.1"
+    cloudpak.ibm.com/version: "1.1.0"
   name: ibm-lt-prod-scc
 allowHostDirVolumePlugin: false
 allowHostIPC: false
@@ -453,12 +449,12 @@ where `<CP4D_NAMESPACE>` is the namespace where CP4D is installed (usually `zen`
 
     ```bash
     ibm-watson-lt-install
-    |__ ibm-watson-lt-pak1-1.1.1
+    |__ ibm-watson-lt-pak1-1.1.0
        |__ images
-          |__ lt_ar-ar_en-us_general_1.1.1.tar.gz
-          |__ lt_de-de_en-us_general_1.1.1.tar.gz
+          |__ lt_ar-ar_en-us_general_1.1.0.tar.gz
+          |__ lt_de-de_en-us_general_1.1.0.tar.gz
           |__ ...
-          |__ lt_zh-tw_en-us_general_1.1.1.tar.gz
+          |__ lt_zh-tw_en-us_general_1.1.0.tar.gz
     ```
 
 6. **Copy language pair images**: For each language pair that you want to install, copy its packed Docker image into the main PPA images directory. You do **not** need to unpack these tar.gz files.
@@ -467,8 +463,8 @@ where `<CP4D_NAMESPACE>` is the namespace where CP4D is installed (usually `zen`
 
     ```bash
     cd ibm-watson-lt-install/
-    cp ibm-watson-lt-pak1-1.1.1/images/lt_ar-ar_en-us_general_1.1.1.tar.gz ibm-watson-lt/images
-    cp ibm-watson-lt-pak1-1.1.1/images/lt_de-de_en-us_general_1.1.1.tar.gz ibm-watson-lt/images
+    cp ibm-watson-lt-pak1-1.1.0/images/lt_ar-ar_en-us_general_1.1.0.tar.gz ibm-watson-lt/images
+    cp ibm-watson-lt-pak1-1.1.0/images/lt_de-de_en-us_general_1.1.0.tar.gz ibm-watson-lt/images
     ```
 
 7. **Configure chart**: Edit the chart configuration YAML files to prepare the installation.
@@ -537,7 +533,7 @@ where `<CP4D_NAMESPACE>` is the namespace where CP4D is installed (usually `zen`
         enabled: true  # <--- set this to true to enable the German to English translation model
         image:
           name: lt_de-de_en-us_general
-          tag: 1.1.1
+          tag: 1.1.0
       ...
     ```
 
