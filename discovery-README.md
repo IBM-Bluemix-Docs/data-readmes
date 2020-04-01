@@ -318,7 +318,7 @@ The installation is complete.
 
 ### Installing the optional language pack
 
-The following enrichments are supported in English only, unless you download and install the language extension pack `ibm-watson-discovery-pack1` from Passport Advantage. For a breakdown of supported languages, see [Language support](https://cloud.ibm.com/docs/services/discovery-data?topic=discovery-data-language-support).
+The following enrichments are supported in English only, unless you download and install the language extension pack `ibm-wat-dis-pack1` from Passport Advantage. For a breakdown of supported languages, see [Language support](https://cloud.ibm.com/docs/services/discovery-data?topic=discovery-data-language-support).
 
 - Entities
 - Keywords
