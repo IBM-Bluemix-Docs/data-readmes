@@ -327,15 +327,14 @@ The following enrichments are supported in English only, unless you download and
 Prerequisite:
 - Watson Discovery must be installed and running
 
-To install `ibm-watson-discovery-pack1`:
-
+To install `ibm-wat-dis-pack1`:
 1. Unpack the language pack.
 
 ```bash
 $ mkdir ibm-watson-discovery-language-pack
 $ cd ibm-watson-discovery-language-pack
-$ mv ~/Downloads/ibm-watson-discovery-pack1-2.1.0.tar.xz .
-$ tar xJf ibm-watson-discovery-pack1-2.1.0.tar.xz
+$ mv ~/Downloads/ibm-wat-dis-pack1-prod-2.1.2.tar.xz
+$ tar xJf ibm-wat-dis-pack1-prod-2.1.2.tar.xz
 $ ls .
 bin lib LICENSE README.md RELEASENOTES.md
 ```
